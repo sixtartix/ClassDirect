@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassDirect - Bloc-notes</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">ClassDirect</div>
+            <div id="mobile-menu" class="menu-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="timer.html">Timer</a></li>
+                <li><a href="notes.html" class="active">Bloc-notes</a></li>
+                <li><a href="group-generator.html">Générateur de groupes</a></li>
+            </ul>
+            <div class="theme-toggle">
+                <input type="checkbox" id="theme-switch" class="theme-switch">
+                <label for="theme-switch" class="theme-switch-label">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </label>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="notes-container">
+        <h1>Bloc-notes</h1>
+        <div class="note-controls">
+            <button id="new-note-btn">Nouvelle note</button>
+            <button id="save-note-btn">Sauvegarder</button>
+        </div>
+        <textarea id="note-content" placeholder="Écrivez votre note ici..."></textarea>
+        <div id="note-list"></div>
+    </main>
+
+    <footer>
+        <p>© 2024 ClassDirect. Tous droits réservés.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="notes.js"></script>
+</body>
+</html>
