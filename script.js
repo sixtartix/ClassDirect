@@ -125,9 +125,10 @@ function updateProgress() {
 
     displayTime(totalTime - elapsedTime);
     
+    // Color change logic
     const ratio = elapsedTime / totalTime;
     if (ratio <= 0.33) {
-        circle.style.stroke = getComputedStyle(document.body).getPropertyValue('--ring-color');
+        circle.style.stroke = 'green';
     } else if (ratio <= 0.66) {
         circle.style.stroke = 'yellow';
     } else {
