@@ -61,7 +61,7 @@ function loadNotes() {
         noteElement.style.marginBottom = '10px';
         
         const noteText = document.createElement('span');
-        noteText.textContent = note.content.substring(0, 50) + '...';
+        noteText.textContent = note.content.substring(0, 25) + '...';
         noteText.style.cursor = 'pointer';
         noteText.addEventListener('click', () => loadNote(index));
         
