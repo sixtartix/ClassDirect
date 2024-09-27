@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sélecteur d'élève aléatoire</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">ClassDirect</div>
+            <div id="mobile-menu" class="menu-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="timer.html">Timer</a></li>
+                <li><a href="notes.html">Bloc-notes</a></li>
+                <li><a href="group-generator.html">Générateur de groupes</a></li>
+                <li><a href="random-eleve.html" class="active">élève aléatoire</a></li>
+            </ul>
+            <div class="theme-toggle">
+                <input type="checkbox" id="theme-switch" class="theme-switch">
+                <label for="theme-switch" class="theme-switch-label">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </label>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="random-student-container">
+            <h2>Sélecteur d'élève aléatoire</h2>
+            <div class="input-section">
+                <textarea id="student-names" rows="10" placeholder="Entrez les noms des élèves, un par ligne"></textarea>
+            </div>
+            <div class="settings">
+                <label>
+                    <input type="checkbox" id="no-duplicates"> Éviter les doublons
+                </label>
+            </div>
+            <button id="select-student">Sélectionner un élève</button>
+            <div id="selected-student-output">
+                <h3>Élève sélectionné :</h3>
+                <p id="selected-student"></p>
+            </div>
+            <button id="reset-selection" style="display: none;">
+                <i class="fas fa-trash-alt" style="color: red;"></i> Réinitialiser la sélection
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Sélecteur d'élève aléatoire</p>
+    </footer>
+
+    <script src="random-eleve.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

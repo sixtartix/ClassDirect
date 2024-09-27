@@ -4,8 +4,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const groupSizeInput = document.getElementById('group-size');
     const generateButton = document.getElementById('generate-groups');
     const groupsOutput = document.getElementById('groups-output');
+    const resetButton = document.getElementById('reset-groups');
 
     generateButton.addEventListener('click', generateGroups);
+    resetButton.addEventListener('click', resetGroups);
+
+    // Charger les noms d'étudiants sauvegardés
+    const savedStudentNames = localStorage.getItem('studentNames');
+    if (savedStudentNames) {
+        studentNamesTextarea.value = savedStudentNames;
+    }
+
+    // Charger les groupes sauvegardés
+    const savedGroups = localStorage.getItem('savedGroups');
+    if (savedGroups) {
+        displayGroups(JSON.parse(savedGroups));
+    }
 
     function generateGroups() {
         const studentNames = studentNamesTextarea.value.split('\n').filter(name => name.trim() !== '');
@@ -16,12 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Sauvegarder les noms d'étudiants
+        localStorage.setItem('studentNames', studentNamesTextarea.value);
+
         const shuffledNames = shuffleArray(studentNames);
         const groups = [];
 
         for (let i = 0; i < shuffledNames.length; i += groupSize) {
             groups.push(shuffledNames.slice(i, i + groupSize));
         }
+
+        // Sauvegarder les groupes
+        localStorage.setItem('savedGroups', JSON.stringify(groups));
 
         displayGroups(groups);
     }
@@ -47,5 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             groupsOutput.appendChild(groupElement);
         });
+        resetButton.style.display = 'block';
+    }
+
+    function resetGroups() {
+        localStorage.removeItem('savedGroups');
+        groupsOutput.innerHTML = '';
+        resetButton.style.display = 'none';
     }
 });
