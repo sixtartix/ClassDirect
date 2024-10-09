@@ -492,3 +492,13 @@ button:hover {
     border-style: solid;
     border-color: transparent transparent var(--about-bg) transparent;
 }
+
+.features a.feature {
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.3s ease;
+}
+
+.features a.feature:hover {
+    transform: translateY(-5px);
+}
