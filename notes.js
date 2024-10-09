@@ -124,3 +124,38 @@ loadNotes();
 // Ajout des écouteurs d'événements
 newNoteBtn.addEventListener('click', newNote);
 saveNoteBtn.addEventListener('click', saveNote);
+
+document.addEventListener('DOMContentLoaded', () => {
+    const helpIcon = document.getElementById('help-icon');
+    const helpTooltip = document.getElementById('help-tooltip');
+
+    if (helpIcon && helpTooltip) {
+        let tooltipTimeout;
+
+        helpIcon.addEventListener('mouseenter', () => {
+            clearTimeout(tooltipTimeout);
+            helpTooltip.style.display = 'block';
+        });
+
+        helpIcon.addEventListener('mouseleave', () => {
+            tooltipTimeout = setTimeout(() => {
+                helpTooltip.style.display = 'none';
+            }, 300);
+        });
+
+        helpTooltip.addEventListener('mouseenter', () => {
+            clearTimeout(tooltipTimeout);
+        });
+
+        helpTooltip.addEventListener('mouseleave', () => {
+            tooltipTimeout = setTimeout(() => {
+                helpTooltip.style.display = 'none';
+            }, 300);
+        });
+
+        // Animation initiale
+        setTimeout(() => {
+            helpIcon.style.animation = 'none';
+        }, 5000);
+    }
+});

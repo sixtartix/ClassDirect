@@ -419,3 +419,76 @@ button:hover {
     position: relative;
     z-index: 1;
 }
+
+/* Ajoutez ou modifiez ces styles dans votre fichier style.css */
+
+.title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* Ajoutez ces styles à la fin du fichier style.css */
+
+.help-icon-container {
+    position: relative;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.help-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    animation: pulse 2s infinite;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.help-icon::after {
+    content: "?";
+}
+
+.help-icon:hover {
+    transform: scale(1.2);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.help-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--about-bg);
+    color: var(--text-color);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    width: 200px;
+    display: none;
+    z-index: 1000;
+}
+
+.help-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent var(--about-bg) transparent;
+}

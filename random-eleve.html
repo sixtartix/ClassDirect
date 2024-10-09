@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sélecteur d'élève aléatoire</title>
+    <title>ClassDirect - Sélecteur d'élève aléatoire</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -34,7 +34,16 @@
     </header>
     <main>
         <div class="random-student-container">
-            <h2>Sélecteur d'élève aléatoire</h2>
+            <div class="title-container">
+                <h2>Sélecteur d'élève aléatoire</h2>
+                <div class="help-icon-container">
+                    <span id="help-icon" class="help-icon"></span>
+                    <div id="help-tooltip" class="help-tooltip">
+                        Astuce : Entrez les noms des élèves, puis cliquez sur le bouton pour sélectionner un élève au hasard. Utile pour les interrogations orales ou pour former des groupes rapidement.
+                    </div>
+                </div>
+            </div>
+
             <div class="input-section">
                 <textarea id="student-names" rows="10" placeholder="Entrez les noms des élèves, un par ligne"></textarea>
             </div>
