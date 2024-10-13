@@ -10,7 +10,7 @@
 <body>
     <header>
         <nav>
-            <div class="logo">ClassDirect</div>
+            <a href="index.html" class="logo">ClassDirect</a>
             <div id="mobile-menu" class="menu-toggle">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -23,6 +23,7 @@
                 <li><a href="group-generator.html">Générateur de groupes</a></li>
                 <li><a href="random-eleve.html">élève aléatoire</a></li>
             </ul>
+
             <div class="theme-toggle">
                 <input type="checkbox" id="theme-switch" class="theme-switch">
                 <label for="theme-switch" class="theme-switch-label">
@@ -61,7 +62,34 @@
             <h2>À propos de ClassDirect</h2>
             <p>ClassDirect est une plateforme conçue pour aider les enseignants à optimiser leur temps et à améliorer l'engagement des élèves. Nos outils intuitifs et faciles à utiliser vous permettent de vous concentrer sur ce qui compte le plus : l'enseignement.</p>
         </section>
-    </main>
+
+    <section class="import-export">
+        <h2>Importation et Exportation des Données</h2>
+        <div class="button-container">
+            <button id="export-data" class="action-button">Exporter mes données</button>
+            <button id="import-data" class="action-button">Importer mes données</button>
+            <input type="file" id="file-input" style="display: none;">
+            <div class="help-icon-container">
+                <span id="help-icon" class="help-icon"></span>
+                <div id="help-tooltip" class="help-tooltip">
+                    Astuce : exportez vos données par clé USB ou un drive pour les utiliser sur un autre ordinateur.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="nouveautes">
+        <h2><i id="swinging-bell" class="fas fa-bell"></i> Quoi de neuf ?</h2>
+        <ul>
+            <li>Ajout d'un système d'import/export de données</li>
+            <li>Ajout d'un bouton pour activer/désactiver le son du buzzer</li>
+            <li>Ajout du logo ClassDirect cliquable</li>
+            <li>Ajout de boutons supplémentaires sur la page principale</li>
+            <li>Ajout de boutons d'aide sur la page principale</li>
+        </ul>
+    </section>    
+
+</main>
 
     <footer>
         <p>© 2024 ClassDirect. Tous droits réservés.</p>

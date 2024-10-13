@@ -1,48 +1,66 @@
-// Fichier group-generator.js
 document.addEventListener('DOMContentLoaded', () => {
     const studentNamesTextarea = document.getElementById('student-names');
     const groupSizeInput = document.getElementById('group-size');
     const generateButton = document.getElementById('generate-groups');
     const groupsOutput = document.getElementById('groups-output');
     const resetButton = document.getElementById('reset-groups');
+    const importButton = document.getElementById('import-names');
 
-    generateButton.addEventListener('click', generateGroups);
-    resetButton.addEventListener('click', resetGroups);
-
-    // Charger les noms d'étudiants sauvegardés
-    const savedStudentNames = localStorage.getItem('studentNames');
-    if (savedStudentNames) {
-        studentNamesTextarea.value = savedStudentNames;
+    if (!studentNamesTextarea || !groupSizeInput || !generateButton || !groupsOutput || !importButton) {
+        console.error('Un ou plusieurs éléments HTML nécessaires sont manquants.');
+        return;
     }
 
-    // Charger les groupes sauvegardés
-    const savedGroups = localStorage.getItem('savedGroups');
-    if (savedGroups) {
-        displayGroups(JSON.parse(savedGroups));
+    generateButton.addEventListener('click', generateGroups);
+    if (resetButton) resetButton.addEventListener('click', resetGroups);
+    importButton.addEventListener('click', importNames);
+
+    loadAndSyncStudentNames();
+    loadSavedGroups();
+
+    function loadAndSyncStudentNames() {
+        const savedStudentNames = localStorage.getItem('sharedStudentNames');
+        if (savedStudentNames) {
+            studentNamesTextarea.value = savedStudentNames;
+        }
+        studentNamesTextarea.addEventListener('input', () => {
+            localStorage.setItem('sharedStudentNames', studentNamesTextarea.value);
+        });
+    }
+
+    function loadSavedGroups() {
+        const savedGroups = localStorage.getItem('savedGroups');
+        if (savedGroups) {
+            displayGroups(JSON.parse(savedGroups));
+        }
     }
 
     function generateGroups() {
-        const studentNames = studentNamesTextarea.value.split('\n').filter(name => name.trim() !== '');
-        const groupSize = parseInt(groupSizeInput.value);
-
-        if (studentNames.length === 0 || isNaN(groupSize) || groupSize < 2) {
-            alert('Veuillez entrer des noms d\'élèves et une taille de groupe valide (minimum 2).');
+        const studentNames = studentNamesTextarea.value
+            .split('\n')
+            .map(name => name.trim())
+            .filter(name => name !== '');
+        const numberOfGroups = Math.max(2, parseInt(groupSizeInput.value) || 2);
+    
+        if (studentNames.length === 0) {
+            alert('Veuillez entrer des noms d\'élèves.');
             return;
         }
-
-        // Sauvegarder les noms d'étudiants
-        localStorage.setItem('studentNames', studentNamesTextarea.value);
-
-        const shuffledNames = shuffleArray(studentNames);
-        const groups = [];
-
-        for (let i = 0; i < shuffledNames.length; i += groupSize) {
-            groups.push(shuffledNames.slice(i, i + groupSize));
-        }
-
-        // Sauvegarder les groupes
+    
+        console.log(`Générant ${numberOfGroups} groupes pour ${studentNames.length} élèves.`);
+    
+        localStorage.setItem('sharedStudentNames', studentNames.join('\n'));
+    
+        const shuffledNames = shuffleArray([...studentNames]);
+        const groups = Array.from({ length: numberOfGroups }, () => []);
+    
+        shuffledNames.forEach((name, index) => {
+            groups[index % numberOfGroups].push(name);
+        });
+    
+        console.log(`${groups.length} groupes générés.`);
+    
         localStorage.setItem('savedGroups', JSON.stringify(groups));
-
         displayGroups(groups);
     }
 
@@ -67,47 +85,54 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             groupsOutput.appendChild(groupElement);
         });
-        resetButton.style.display = 'block';
+        if (resetButton) resetButton.style.display = 'block';
     }
 
     function resetGroups() {
         localStorage.removeItem('savedGroups');
         groupsOutput.innerHTML = '';
-        resetButton.style.display = 'none';
+        if (resetButton) resetButton.style.display = 'none';
     }
-});
 
-document.addEventListener('DOMContentLoaded', () => {
-    const helpIcon = document.getElementById('help-icon');
-    const helpTooltip = document.getElementById('help-tooltip');
+    let fileInput = null;
 
-    if (helpIcon && helpTooltip) {
-        let tooltipTimeout;
-
-        helpIcon.addEventListener('mouseenter', () => {
-            clearTimeout(tooltipTimeout);
-            helpTooltip.style.display = 'block';
-        });
-
-        helpIcon.addEventListener('mouseleave', () => {
-            tooltipTimeout = setTimeout(() => {
-                helpTooltip.style.display = 'none';
-            }, 300);
-        });
-
-        helpTooltip.addEventListener('mouseenter', () => {
-            clearTimeout(tooltipTimeout);
-        });
-
-        helpTooltip.addEventListener('mouseleave', () => {
-            tooltipTimeout = setTimeout(() => {
-                helpTooltip.style.display = 'none';
-            }, 300);
-        });
-
-        // Animation initiale
-        setTimeout(() => {
-            helpIcon.style.animation = 'none';
-        }, 5000);
+    function importNames() {
+        if (fileInput) {
+            document.body.removeChild(fileInput);
+        }
+        
+        fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.txt,.json';
+        fileInput.style.display = 'none';
+        
+        fileInput.onchange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const content = e.target.result;
+                        let names;
+                        if (file.name.endsWith('.json')) {
+                            const data = JSON.parse(content);
+                            names = data.sharedStudentNames || '';
+                        } else {
+                            names = content;
+                        }
+                        studentNamesTextarea.value = names;
+                        localStorage.setItem('sharedStudentNames', names);
+                        alert('Noms d\'élèves importés avec succès.');
+                    } catch (error) {
+                        console.error('Erreur lors de l\'importation:', error);
+                        alert('Erreur lors de l\'importation des noms d\'élèves.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+        
+        document.body.appendChild(fileInput);
+        fileInput.click();
     }
 });

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluation des Élèves</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Évaluation des Élèves</h1>
+
+    <label for="student-select">Choisir un élève:</label>
+    <select id="student-select" onchange="loadStudent()">
+        <option value="-1">Sélectionner un élève</option>
+        <!-- Options des élèves seront ajoutées ici -->
+    </select>
+
+    <div id="student-form" style="display:none;">
+        <h2>Évaluation de l'Élève</h2>
+        <label for="barème-type">Type de barème:</label>
+        <select id="barème-type">
+            <option value="poésie">Poésie</option>
+            <option value="oral">Oral</option>
+            <option value="autre">Autre</option>
+        </select>
+
+        <h3>Critères:</h3>
+        <label>
+            <input type="radio" name="criteria" value="non réussie"> Mauvais
+        </label>
+        <label>
+            <input type="radio" name="criteria" value="moyennement réussie"> Moyen
+        </label>
+        <label>
+            <input type="radio" name="criteria" value="réussie"> Excellent
+        </label>
+
+        <button onclick="saveStudent()">Enregistrer</button>
+        <button onclick="removeStudent()">Supprimer</button>
+    </div>
+
+    <input type="file" id="file-input" accept=".txt" />
+    <button onclick="importStudents()">Importer des élèves</button>
+
+    <canvas id="resultChart" width="400" height="200"></canvas>
+
+    <script src="bareme.js"></script>
+</body>
+</html>

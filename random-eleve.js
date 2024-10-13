@@ -11,10 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
     selectButton.addEventListener('click', selectRandomStudent);
     resetButton.addEventListener('click', resetSelection);
 
-    // Charger les noms d'étudiants sauvegardés
-    const savedStudentNames = localStorage.getItem('studentNames');
-    if (savedStudentNames) {
-        studentNamesTextarea.value = savedStudentNames;
+    // Charger et synchroniser les noms d'étudiants
+    loadAndSyncStudentNames();
+
+    // Vérifier périodiquement les mises à jour
+    setInterval(loadAndSyncStudentNames, 5000); // Vérifie toutes les 5 secondes
+
+    function loadAndSyncStudentNames() {
+        const savedStudentNames = localStorage.getItem('sharedStudentNames');
+        if (savedStudentNames && savedStudentNames !== studentNamesTextarea.value) {
+            studentNamesTextarea.value = savedStudentNames;
+        } else if (studentNamesTextarea.value && !savedStudentNames) {
+            // Si le textarea a des noms mais le localStorage est vide, on sauvegarde
+            localStorage.setItem('sharedStudentNames', studentNamesTextarea.value);
+        }
     }
 
     function selectRandomStudent() {
@@ -26,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Sauvegarder les noms d'étudiants
-        localStorage.setItem('studentNames', studentNamesTextarea.value);
+        localStorage.setItem('sharedStudentNames', studentNamesTextarea.value);
 
         let availableStudents = noDuplicatesCheckbox.checked
             ? studentNames.filter(name => !selectedStudents.includes(name))
@@ -55,39 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedStudentOutput.textContent = '';
         resetButton.style.display = 'none';
     }
+
+    // Ajouter un écouteur d'événements pour mettre à jour le stockage local lorsque le contenu change
+    studentNamesTextarea.addEventListener('input', () => {
+        localStorage.setItem('sharedStudentNames', studentNamesTextarea.value);
+    });
+
+    // Ajouter un écouteur d'événements pour le focus
+    studentNamesTextarea.addEventListener('focus', loadAndSyncStudentNames);
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const helpIcon = document.getElementById('help-icon');
-    const helpTooltip = document.getElementById('help-tooltip');
-
-    if (helpIcon && helpTooltip) {
-        let tooltipTimeout;
-
-        helpIcon.addEventListener('mouseenter', () => {
-            clearTimeout(tooltipTimeout);
-            helpTooltip.style.display = 'block';
-        });
-
-        helpIcon.addEventListener('mouseleave', () => {
-            tooltipTimeout = setTimeout(() => {
-                helpTooltip.style.display = 'none';
-            }, 300);
-        });
-
-        helpTooltip.addEventListener('mouseenter', () => {
-            clearTimeout(tooltipTimeout);
-        });
-
-        helpTooltip.addEventListener('mouseleave', () => {
-            tooltipTimeout = setTimeout(() => {
-                helpTooltip.style.display = 'none';
-            }, 300);
-        });
-
-        // Animation initiale
-        setTimeout(() => {
-            helpIcon.style.animation = 'none';
-        }, 5000);
-    }
-});

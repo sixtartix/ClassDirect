@@ -1,4 +1,8 @@
 // Fichier notes.js
+
+window.loadNotes = loadNotes;
+window.loadNote = loadNote;
+
 let currentNote = null;
 const noteContent = document.getElementById('note-content');
 const noteList = document.getElementById('note-list');
@@ -159,3 +163,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
 });
+
+window.loadNotes = loadNotes;

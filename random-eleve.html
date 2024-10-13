@@ -10,12 +10,12 @@
 <body>
     <header>
         <nav>
-            <div class="logo">ClassDirect</div>
-            <div id="mobile-menu" class="menu-toggle">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+          <a href="index.html" class="logo">ClassDirect</a>
+          <div id="mobile-menu" class="menu-toggle">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </div>
             <ul class="nav-menu">
                 <li><a href="index.html">Accueil</a></li>
                 <li><a href="timer.html">Timer</a></li>
@@ -53,6 +53,8 @@
                 </label>
             </div>
             <button id="select-student">Sélectionner un élève</button>
+            <button id="import-data">Importer des noms d'élèves</button>
+            <input type="file" id="file-input" accept=".json,.txt,.pdf,.docx" style="display: none;">
             <div id="selected-student-output">
                 <h3>Élève sélectionné :</h3>
                 <p id="selected-student"></p>
@@ -69,5 +71,8 @@
 
     <script src="random-eleve.js"></script>
     <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
 </body>
 </html>
