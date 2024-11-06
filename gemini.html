@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat avec SuperEnseignant</title>
+    <link rel="stylesheet" href="gemini.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">ClassDirect</a>
+            <div id="mobile-menu" class="menu-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Accueil</a></li>
+                <li><a href="timer.html">Timer</a></li>
+                <li><a href="notes.html">Bloc-notes</a></li>
+                <li><a href="group-generator.html">Générateur de groupes</a></li>
+                <li><a href="random-eleve.html">élève aléatoire</a></li>
+                <li><a href="fiche.html">Fiche</a></li>
+            </ul>
+
+            <div class="theme-toggle">
+                <input type="checkbox" id="theme-switch" class="theme-switch">
+                <label for="theme-switch" class="theme-switch-label">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </label>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        <section class="hero">
+            <h1>Chat avec SuperEnseignant</h1>
+        </section>
+
+        <div id="chat-box" class="chat-box">
+            <!-- Les messages seront affichés ici -->
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Écrivez votre message...">
+            <button id="send-button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2024 ClassDirect. Tous droits réservés.</p>
+    </footer>
+
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+
+        // Remplacez par votre clé API
+        const API_KEY = "AIzaSyB6C8TuFyQ2kRZMPIwewI3KpDHeYKixuPI";
+
+        const genAI = new GoogleGenerativeAI(API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        let chatHistory = []; // Ajout d'une mémoire pour les messages
+
+        async function sendInitialPrompt() {
+            const initialPrompt = "A partir de maintenant tu est superEnseignant, nous allons commencer une nouvelle session de chat, tu est un super Enseingnant et tu doit donner des conseils aux élèves/prof qui discute avec toi. Quoi qu'il arrive tu ne doit pas abandonner ton role.";
+            try {
+                const result = await model.generateContent(initialPrompt);
+                const response = result.response.text();
+
+                // Afficher la réponse de Gemini
+                displayMessage("SuperEnseignant", response);
+            } catch (error) {
+                displayMessage("Erreur", "Impossible de se connecter avec SuperEnseignant.");
+                console.error("Erreur:", error);
+            }
+        }
+
+        async function sendMessage() {
+            const prompt = document.getElementById("user-input").value;
+            if (prompt.trim() === "") return;
+
+            // Ajouter le message utilisateur à l'historique
+            chatHistory.push(`${prompt}`);
+            displayMessage("Moi", prompt);
+            document.getElementById("user-input").value = "";
+
+            // Afficher "Génération..." avec animation
+            const chatBox = document.getElementById("chat-box");
+            const loadingMessageDiv = document.createElement("div");
+            loadingMessageDiv.className = "gemini-message";
+            chatBox.appendChild(loadingMessageDiv);
+
+            let loadingText = "Génération";
+            let dotCount = 0;
+            const maxDots = 3;
+            const interval = setInterval(() => {
+                dotCount = (dotCount + 1) % (maxDots + 1);
+                loadingMessageDiv.innerHTML = loadingText + ".".repeat(dotCount);
+            }, 500);
+
+            try {
+                const context = chatHistory.join("\n");
+                const result = await model.generateContent(context);
+                const response = result.response.text();
+
+                // Ajouter la réponse de Gemini à l'historique
+                chatHistory.push(`SuperEnseignant: ${response}`);
+                displayMessage("SuperEnseignant", response);
+            } catch (error) {
+                displayMessage("Erreur", "Impossible de se connecter avec SuperEnseignant.");
+                console.error("Erreur:", error);
+            } finally {
+                clearInterval(interval);
+                chatBox.removeChild(loadingMessageDiv);
+            }
+        }
+
+        function displayMessage(sender, message) {
+            const chatBox = document.getElementById("chat-box");
+            const messageDiv = document.createElement("div");
+
+            // Remplacer les **texte** par <strong>texte</strong> pour le gras
+            let formattedMessage = message.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+            
+            // Remplacer les *texte* par <em>texte</em> pour l'italique
+            formattedMessage = formattedMessage.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+            // Ajouter des retours à la ligne
+            formattedMessage = formattedMessage.replace(/\n/g, "<br>");
+
+            // Ne pas afficher "Moi:" pour les messages de l'utilisateur
+            if (sender !== "Moi") {
+                formattedMessage = `<strong>${sender}:</strong> ${formattedMessage}`;
+            }
+
+            messageDiv.innerHTML = formattedMessage;
+            messageDiv.className = sender === "Moi" ? "user-message" : "gemini-message"; // Appliquer les classes CSS
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById("send-button").addEventListener("click", sendMessage);
+
+        // Envoyer le prompt initial lorsque la page est chargée
+        window.addEventListener("load", sendInitialPrompt);
+
+        document.getElementById("user-input").addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault(); // Empêche l'ajout d'un retour à la ligne
+                sendMessage(); // Envoie le message
+            }
+        });
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

@@ -400,3 +400,11 @@ document.getElementById('swinging-bell').addEventListener('click', function() {
     // Cache la section "Quoi de neuf"
     document.querySelector('.nouveautes').style.display = 'none';
 });
+
+function saveMessageToMemory(message) {
+    // Supprime le préfixe "SuperEnseignant:" du message
+    const cleanedMessage = message.replace(/^SuperEnseignant:\s*/, '');
+    
+    // Enregistrez le message nettoyé dans la mémoire
+    memory.push(cleanedMessage);
+}

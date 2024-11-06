@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barème d'évaluation - ClassDirect</title>
+    <link rel="stylesheet" href="fiche.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.11/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">ClassDirect</a>
+            <div id="mobile-menu" class="menu-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="timer.html">Timer</a></li>
+                <li><a href="notes.html">Bloc-notes</a></li>
+                <li><a href="group-generator.html">Générateur de groupes</a></li>
+                <li><a href="random-eleve.html">élève aléatoire</a></li>
+                <li><a href="fiche.html" class="active">Fiche</a></li>
+            </ul>
+
+            <div class="theme-toggle">
+                <input type="checkbox" id="theme-switch" class="theme-switch">
+                <label for="theme-switch" class="theme-switch-label">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </label>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        <section class="hero">
+            <h1>Générateur de Fiches</h1>
+        </section>
+
+        <div class="form-container">
+            <input type="text" id="class-input" placeholder="Classe">
+            <input type="text" id="subject-input" placeholder="Matière">
+            <input type="text" id="topic-input" placeholder="Sujet">
+            <select id="type-input">
+                <option value="résumé rapide">Résumé rapide</option>
+                <option value="approfondie">Approfondie</option>
+                <option value="révision">Révision</option>
+                <option value="exercice">Exercice</option>
+            </select>
+            <button id="generate-button">Générer la Fiche</button>
+        </div>
+
+        <div id="preview-box" class="preview-box">
+            <!-- L'aperçu de la fiche sera affiché ici -->
+        </div>
+
+        <button id="download-button" style="display:none;">Télécharger en PDF</button>
+    </main>
+
+    <footer>
+        <p>© 2024 ClassDirect. Tous droits réservés.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+        import 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        import 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js';
+
+        const API_KEY = "AIzaSyB6C8TuFyQ2kRZMPIwewI3KpDHeYKixuPI";
+        const genAI = new GoogleGenerativeAI(API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Charger la classe depuis le localStorage
+            const savedClass = localStorage.getItem("class");
+            if (savedClass) {
+                document.getElementById("class-input").value = savedClass;
+            }
+
+            // Ajouter un écouteur d'événement pour enregistrer la classe lorsque le champ perd le focus
+            document.getElementById("class-input").addEventListener("blur", () => {
+                const classe = document.getElementById("class-input").value;
+                localStorage.setItem("class", classe);
+            });
+        });
+
+        let fullContent = ""; // Variable globale pour stocker le texte complet
+
+        document.getElementById("generate-button").addEventListener("click", async () => {
+            const classe = document.getElementById("class-input").value.trim();
+            const matiere = document.getElementById("subject-input").value.trim();
+            const sujet = document.getElementById("topic-input").value.trim();
+            const type = document.getElementById("type-input").value;
+
+            // Vérifier que tous les champs sont remplis
+            if (!classe || !matiere || !sujet || !type) {
+                alert("Veuillez remplir tous les champs avant de générer la fiche.");
+                return;
+            }
+
+            const prompt = `Créer une fiche de type ${type} pour la classe ${classe} en ${matiere} sur le sujet ${sujet}.Pour mettre des elements important en fluo met les message entre $`;
+
+            // Afficher "Génération de votre fiche..." avec animation
+            const previewBox = document.getElementById("preview-box");
+            let loadingText = "Génération de votre fiche";
+            let dotCount = 0;
+            const maxDots = 3;
+            const interval = setInterval(() => {
+                dotCount = (dotCount + 1) % (maxDots + 1);
+                previewBox.innerHTML = loadingText + ".".repeat(dotCount);
+            }, 500);
+
+            try {
+                const result = await model.generateContent(prompt);
+                const response = result.response.text();
+
+                // Stocker le texte complet
+                fullContent = formatText(response);
+
+                // Limiter l'aperçu à un certain nombre de caractères
+                const previewLength = 200;
+                const previewText = fullContent.length > previewLength 
+                    ? fullContent.substring(0, previewLength) + "..." 
+                    : fullContent;
+
+                // Afficher l'aperçu de la fiche
+                previewBox.innerHTML = previewText;
+                document.getElementById("download-button").style.display = "block";
+            } catch (error) {
+                console.error("Erreur:", error);
+                previewBox.innerHTML = "Erreur lors de la génération de la fiche.";
+            } finally {
+                clearInterval(interval);
+            }
+        });
+
+        document.getElementById("download-button").addEventListener("click", () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+
+            // Convertir le texte formaté en texte brut pour le PDF
+            let plainText = fullContent
+                .replace(/<br>/g, "\n") // Convertir les sauts de ligne
+                .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => p1.toUpperCase()) // Convertir le texte en gras
+                .replace(/<em>(.*?)<\/em>/g, (match, p1) => `_${p1}_`); // Convertir le texte en italique
+
+            const lines = doc.splitTextToSize(plainText, 180);
+
+            const pageHeight = doc.internal.pageSize.height;
+            let y = 20;
+
+            const highlightColor = [255, 255, 0];
+
+            lines.forEach((line) => {
+                if (y + 10 > pageHeight) {
+                    doc.addPage();
+                    y = 20;
+                }
+
+                let x = 10;
+                const parts = line.split(/(<highlight>.*?<\/highlight>)/g);
+
+                parts.forEach((part) => {
+                    if (part.startsWith("<highlight>") && part.endsWith("</highlight>")) {
+                        const textToHighlight = part.replace(/<\/?highlight>/g, '');
+                        const highlightWidth = doc.getTextWidth(textToHighlight);
+                        doc.setFillColor(...highlightColor);
+                        doc.rect(x, y - 6, highlightWidth + 2, 10, 'F');
+                        doc.text(textToHighlight, x, y);
+                        x += highlightWidth;
+                    } else {
+                        doc.text(part, x, y);
+                        x += doc.getTextWidth(part);
+                    }
+                });
+
+                y += 10;
+            });
+
+            doc.save("fiche.pdf");
+        });
+
+        function formatText(text) {
+            // Remplacer les **texte** par <strong>texte</strong> pour le gras
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+            
+            // Remplacer les *texte* par <em>texte</em> pour l'italique
+            formattedText = formattedText.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+            // Marquer les expressions entre $ pour la surbrillance
+            formattedText = formattedText.replace(/\$(.*?)\$/g, "<highlight>$1</highlight>");
+
+            // Ajouter des retours à la ligne
+            formattedText = formattedText.replace(/\n/g, "<br>");
+
+            return formattedText;
+        }
+    </script>
+</body>
+</html>

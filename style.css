@@ -600,4 +600,16 @@ button:hover {
     100% { transform: rotate(0deg); }
 }
 
+.user-message {
+    text-align: right;
+    background-color: #f0f0f0; /* Couleur de fond pour le mode clair */
+    padding: 5px;
+    margin: 5px 0;
+    border-radius: 5px;
+    color: #333; /* Couleur du texte pour le mode clair */
+}
 
+[data-theme="dark"] .user-message {
+    background-color: #333; /* Couleur de fond pour le mode sombre */
+    color: #ccc; /* Couleur du texte pour le mode sombre */
+}
