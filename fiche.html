@@ -17,6 +17,7 @@
         }
       }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <header>
@@ -48,7 +49,7 @@
 
     <main role="main">
         <section class="hero">
-            <h1>Générateur de Fiches</h1>
+            <h1>Génrateur de Fiches</h1>
         </section>
 
         <div class="form-container">
@@ -113,7 +114,7 @@
                 return;
             }
 
-            const prompt = `Créer une fiche de type ${type} pour la classe ${classe} en ${matiere} sur le sujet ${sujet}.Pour mettre des elements important en fluo met les message entre $`;
+            const prompt = `Créer une fiche de type ${type} pour la classe ${classe} en ${matiere} sur le sujet ${sujet}.Pour mettre des elements important en fluo met les message entre $, en math utilise les formules ordinateur divisé (/) foix (*) etc...`;
 
             // Afficher "Génération de votre fiche..." avec animation
             const previewBox = document.getElementById("preview-box");
@@ -127,16 +128,15 @@
 
             try {
                 const result = await model.generateContent(prompt);
-                const response = result.response.text();
+                const response = await result.response.text();
+
+                // Afficher le texte généré dans la console
+                console.log("Texte généré par Gemini:", response);
 
                 // Stocker le texte complet
                 fullContent = formatText(response);
 
-                // Limiter l'aperçu à un certain nombre de caractères
-                const previewLength = 200;
-                const previewText = fullContent.length > previewLength 
-                    ? fullContent.substring(0, previewLength) + "..." 
-                    : fullContent;
+                const previewText = fullContent;
 
                 // Afficher l'aperçu de la fiche
                 previewBox.innerHTML = previewText;
@@ -161,12 +161,30 @@
                 .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => p1.toUpperCase()) // Convertir le texte en gras
                 .replace(/<em>(.*?)<\/em>/g, (match, p1) => `_${p1}_`); // Convertir le texte en italique
 
-            const lines = doc.splitTextToSize(plainText, 180);
+            // Remplacer les expressions LaTeX par une version textuelle
+            plainText = plainText
+                .replace(/\mathbb{R}/g, "ℝ")
+                .replace(/e\^x > 0 pour tout x \\in/g, "e^x > 0 pour tout x ∈")
+                .replace(/\\frac\{1\}\{e\^x\}/g, "1/e^x")
+                .replace(/e\^\{x\+y\} = e\^x \\cdot e\^y/g, "e^(x+y) = e^x * e^y")
+                .replace(/e\^\{-x\} =/g, "e^(-x) =")
+                .replace(/\\lim\_\{x \to \+\infty\} e\^x = \+\infty/g, "lim (x -> +∞) e^x = +∞")
+                .replace(/\to/g, "->")
+                .replace(/\\lim_/g, "lim")
+                .replace(/\\infty/g, "∞");
+
+            const pageWidth = doc.internal.pageSize.width;
+            const margin = 10;
+            const maxLineWidth = pageWidth - 2 * margin;
+
+            const lines = plainText.split('\n').flatMap(line => doc.splitTextToSize(line, maxLineWidth));
 
             const pageHeight = doc.internal.pageSize.height;
             let y = 20;
 
             const highlightColor = [255, 255, 0];
+            let isHighlighting = false;
+            let highlightBuffer = '';
 
             lines.forEach((line) => {
                 if (y + 10 > pageHeight) {
@@ -174,22 +192,40 @@
                     y = 20;
                 }
 
-                let x = 10;
-                const parts = line.split(/(<highlight>.*?<\/highlight>)/g);
+                let x = margin;
+                const parts = line.split(/(<\/?highlight>)/gi); // Insensible à la casse
 
                 parts.forEach((part) => {
-                    if (part.startsWith("<highlight>") && part.endsWith("</highlight>")) {
-                        const textToHighlight = part.replace(/<\/?highlight>/g, '');
-                        const highlightWidth = doc.getTextWidth(textToHighlight);
-                        doc.setFillColor(...highlightColor);
-                        doc.rect(x, y - 6, highlightWidth + 2, 10, 'F');
-                        doc.text(textToHighlight, x, y);
-                        x += highlightWidth;
+                    if (part.toLowerCase() === "<highlight>") {
+                        isHighlighting = true;
+                    } else if (part.toLowerCase() === "</highlight>") {
+                        if (highlightBuffer) {
+                            const highlightWidth = doc.getTextWidth(highlightBuffer);
+                            doc.setFillColor(...highlightColor);
+                            doc.rect(x, y - 6, highlightWidth, 10, 'F');
+                            doc.text(highlightBuffer, x, y);
+                            x += highlightWidth;
+                            highlightBuffer = '';
+                        }
+                        isHighlighting = false;
                     } else {
-                        doc.text(part, x, y);
-                        x += doc.getTextWidth(part);
+                        if (isHighlighting) {
+                            highlightBuffer += part;
+                        } else {
+                            doc.text(part, x, y);
+                            x += doc.getTextWidth(part);
+                        }
                     }
                 });
+
+                if (isHighlighting && highlightBuffer) {
+                    const highlightWidth = doc.getTextWidth(highlightBuffer);
+                    doc.setFillColor(...highlightColor);
+                    doc.rect(x, y - 6, highlightWidth, 10, 'F');
+                    doc.text(highlightBuffer, x, y);
+                    x += highlightWidth;
+                    highlightBuffer = '';
+                }
 
                 y += 10;
             });
@@ -204,7 +240,7 @@
             // Remplacer les *texte* par <em>texte</em> pour l'italique
             formattedText = formattedText.replace(/\*(.*?)\*/g, "<em>$1</em>");
 
-            // Marquer les expressions entre $ pour la surbrillance
+            // Marquer les expressions entre $ pour la surbrillance, insensible à la casse
             formattedText = formattedText.replace(/\$(.*?)\$/g, "<highlight>$1</highlight>");
 
             // Ajouter des retours à la ligne

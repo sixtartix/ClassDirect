@@ -115,7 +115,12 @@
             try {
                 const context = chatHistory.join("\n");
                 const result = await model.generateContent(context);
-                const response = result.response.text();
+                let response = result.response.text();
+
+                // Supprimer "SuperEnseignant: " si présent au début de la réponse
+                if (response.startsWith("SuperEnseignant: ")) {
+                    response = response.substring("SuperEnseignant: ".length);
+                }
 
                 // Ajouter la réponse de Gemini à l'historique
                 chatHistory.push(`SuperEnseignant: ${response}`);
